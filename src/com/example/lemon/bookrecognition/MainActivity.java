@@ -2,22 +2,26 @@ package com.example.lemon.bookrecognition;
 
 import java.io.FileOutputStream;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 
 import com.example.bookrecognition.R;
+import com.example.bookrecognition.RecognizePicActivity;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -26,12 +30,19 @@ public class MainActivity extends ActionBarActivity {
 	private SurfaceView picSV;
 	@SuppressWarnings("deprecation")
 	private Camera camera;
+
+	private ImageButton btn;
+
+	private Image pic = null;
+	private RelativeLayout layout;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         picSV = (SurfaceView)findViewById(R.id.picSV);
+        btn = (ImageButton)findViewById(R.id.takeBtn);
+        layout = (RelativeLayout) findViewById(R.id.layout);
         picSV.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         picSV.getHolder().addCallback(new MyCallback());
     }
@@ -127,15 +138,39 @@ public class MainActivity extends ActionBarActivity {
     	
     }
     
+    @SuppressLint("SdCardPath") 
     private class MyPictureCallback implements PictureCallback{
 
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
 			// TODO Auto-generated method stub
 			try{
-				FileOutputStream fos = new FileOutputStream("/mnt/sdcard/DCIM/Camera/"+System.currentTimeMillis()+".jpeg");
+				String path = "/mnt/sdcard/DCIM/Camera/"+System.currentTimeMillis()+".jpeg";
+				//±£¥ÊÕº∆¨µΩsdø®
+				FileOutputStream fos = new FileOutputStream(path);
 				fos.write(data);
 				fos.close();
+				//∂¡»°Õº∆¨œ‘ æ
+				/*Bitmap bitmap = BitmapFactory.decodeFile(path);
+				ImageView img = new ImageView(MainActivity.this);
+				img.setId(1);
+				img.setLayoutParams(new LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT));
+				img.setScaleType(ImageView.ScaleType.CENTER_CROP);
+				img.setPadding(2, 0, 0, 5);
+				img.setImageBitmap(bitmap);
+				
+				layout.addView(img);
+				
+				progressBar.setVisibility(View.VISIBLE);
+		    	btn.setVisibility(View.INVISIBLE);
+		    	hints.setVisibility(View.VISIBLE);
+		    	*/
+				
+				  Intent intent = new Intent();
+				  intent.putExtra("path", path);
+			      intent.setClass(MainActivity.this,RecognizePicActivity.class);
+			      startActivity(intent);
+				
 			}catch(Exception e){
 				
 			}
@@ -143,22 +178,5 @@ public class MainActivity extends ActionBarActivity {
     	
     }
     
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+   
 }
